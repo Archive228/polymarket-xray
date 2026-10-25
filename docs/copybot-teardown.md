@@ -1,6 +1,6 @@
 # Taking apart an open-source copy-bot with REA
 
-Target: [shmlkv/polymarket-copy-trading-bot](https://github.com/shmlkv/polymarket-copy-trading-bot) – the most-starred permissively licensed TypeScript copy-bot for Polymarket (ISC, 49★, October 2026). It was not run and its dependencies were not installed: REA reads the source as text.
+Target: [shmlkv/polymarket-copy-trading-bot](https://github.com/shmlkv/polymarket-copy-trading-bot) – a popular permissively licensed TypeScript copy-bot for Polymarket (ISC, 49★, October 2026). It was not run and its dependencies were not installed: REA reads the source as text.
 
 ## How
 
