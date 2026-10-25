@@ -68,8 +68,8 @@ The bot polls the leader every 3 seconds, sizes each copy, and fills it on a pap
 
 On 11 wallets and five 20-minute live paper runs (October 2026):
 
-- A copy arrives 2–6 seconds after the leader's trade (including a 3 s poll).
-- Maker entries can't be copied at the leader's price: the order book has moved by the time the copy arrives – BTC 5-minute leader buys at 0.81, best ask 1.9 s later is 0.93.
+- The copy sees the leader's trade 2–6 seconds after it (including a 3 s poll).
+- On fast markets the leader's price is gone by then: a BTC 5-minute leader buys at 0.81, and when the copy checks the book 5.1 s later the best ask is 0.93.
 - Who you copy matters more than how fast: a 15-minute crypto bot's +7.4% becomes −12.1% copied one minute late; a sports bettor's +33.6% is still +32.6% copied an hour late.
 
 ## Built on
