@@ -1,0 +1,12 @@
+{
+  "name": "polymarket-xray",
+  "description": "Polymarket wallet reverse-engineering for Claude Code",
+  "owner": { "name": "Archive228", "url": "https://github.com/Archive228" },
+  "plugins": [
+    {
+      "name": "polymarket-xray",
+      "source": "./",
+      "description": "Reverse-engineer any Polymarket wallet and check whether it can be copied"
+    }
+  ]
+}

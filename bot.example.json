@@ -1,0 +1,13 @@
+{
+  "name": "paper-demo",
+  "mode": "paper",
+  "leaders": ["0x7c37b52eb226bcb9411375ec48b0169663fb6aeb"],
+  "start_cash": 1000,
+  "poll_sec": 3,
+  "sizing": {"strategy": "FIXED", "copy_size": 20, "max_order_usd": 50, "min_order_usd": 1, "max_position_usd": 100,
+             "tiered_multipliers": ""},
+  "slippage": {"rel": 0.05, "abs": 0.02},
+  "filters": {"max_age_sec": 60, "min_price": 0.02, "max_price": 0.98, "min_seconds_to_end": 60, "categories": []},
+  "risk": {"max_daily_buy_usd": 500, "max_open_positions": 50, "max_market_usd": 100, "max_total_exposure_usd": 800,
+           "max_drawdown_usd": 300, "kill_switch": "STOP"}
+}

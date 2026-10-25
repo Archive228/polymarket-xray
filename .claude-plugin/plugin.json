@@ -1,0 +1,11 @@
+{
+  "name": "polymarket-xray",
+  "displayName": "Polymarket X-ray",
+  "version": "0.1.0",
+  "description": "Reverse-engineer any Polymarket wallet: every trade, the strategy as a step-by-step recipe with evidence, whether copying it still pays after a delay, and a paper copy-bot on live order books.",
+  "author": { "name": "Archive228", "url": "https://github.com/Archive228" },
+  "homepage": "https://github.com/Archive228/polymarket-xray",
+  "repository": "https://github.com/Archive228/polymarket-xray",
+  "license": "MIT",
+  "keywords": ["polymarket", "prediction-markets", "reverse-engineering", "copy-trading", "trading-bot", "wallet-analysis"]
+}

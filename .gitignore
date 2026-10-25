@@ -1,0 +1,17 @@
+# data the tool downloads and the paper bot's journals
+data/
+*.db
+*.db-wal
+*.db-shm
+# keys never go in git
+.env
+.env.*
+!.env.example
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+# local
+.DS_Store
+bot.json
