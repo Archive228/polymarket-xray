@@ -106,9 +106,11 @@ def charts(a: dict, c: dict) -> dict:
     ax.bar([int(h) for h in hrs], [v * 100 for v in hrs.values()], color=ACC)
     ax.set_title("when he trades, % of trades by UTC hour", loc="left", color=FG)
     out["hours"] = _img(fig)
-    if c and c.get("overall"):
-        # points where we manage to repeat less than 10% of his money are not drawn – there is nothing left to copy
-        ms = [m for m in c["modes"] if c["overall"][m]["roi"] is not None and (c["overall"][m]["copied_share"] or 0) >= .1]
+    # points where we manage to repeat less than 10% of his money are not drawn – there is nothing left to copy;
+    # with no point at all (every position closed before a copy could enter) there is no chart and no copy section
+    ms = [m for m in c["modes"] if c["overall"][m]["roi"] is not None and (c["overall"][m]["copied_share"] or 0) >= .1] \
+        if c and c.get("overall") else []
+    if ms:
         rois = [c["overall"][m]["roi"] * 100 for m in ms]
         fig, ax = plt.subplots(figsize=(8, 2.8))
         ax.axhline(0, color=DIM, lw=1)
@@ -292,7 +294,7 @@ adjusted for testing several buckets at once; below 0.05 – not chance.</div>{%
 <table><tr><th></th><th>return</th><th>of his money repeated</th><th>positions</th></tr>
 {% for m in cs.modes %}<tr><td>{{ cs.labels[m] }}</td><td>{{ pct(cs.overall[m].roi) }}</td><td>{{ share(cs.overall[m].copied_share) }}</td><td>{{ cs.overall[m].positions }}</td></tr>{% endfor %}</table>
 <div class="sub">the latest {{ cs.sample }} of {{ cs.population_positions }} resolved positions, the total weighted by his money in the buckets ·
-the copier is a taker paying the fee, buying no cheaper than he did · each 1¢ of slippage costs another {{ '%.1f'|format(cs.overall['m1'].slip_pp_per_cent) }} pp</div>{% endif %}
+the copier is a taker paying the fee, buying no cheaper than he did{% if cs.overall['m1'].slip_pp_per_cent is not none %} · each 1¢ of slippage costs another {{ '%.1f'|format(cs.overall['m1'].slip_pp_per_cent) }} pp{% endif %}</div>{% endif %}
 <h2>Best and worst positions</h2><table><tr><th>market</th><th>outcome</th><th>entry</th><th>invested</th><th>PnL</th></tr>
 {% for r in best + worst %}<tr><td>{{ r.title }}</td><td>{{ r.outcome }}</td><td>{{ r.avg_price }}</td><td>{{ money(r.cost) }}</td><td>{{ money(r.pnl) }}</td></tr>{% endfor %}</table>
 <h2>Calculation limits</h2><ul>{% for l in limits %}<li class="sub">{{ l }}</li>{% endfor %}</ul>

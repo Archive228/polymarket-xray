@@ -1,6 +1,7 @@
 ---
 name: xray
 description: Reverse-engineer any Polymarket wallet with the local pmx tool – download every trade, tell whether it is a bot and which strategy it runs (step-by-step recipe with evidence), where the money really comes from, and whether copying it still pays after a 1–60 minute delay; optionally copy it on a paper account against live order books. Use this whenever the user gives a Polymarket wallet address, a profile link (polymarket.com/@name or /profile/0x…) or a trader name and asks what it does, how it makes money, whether it is a bot, whether to copy-trade it, "analyze this wallet", "what is his strategy", "can he be copied", or wants several Polymarket traders compared – even if pmx is not mentioned.
+compatibility: Needs python3, git and outbound HTTPS to github.com, data-api.polymarket.com, gamma-api.polymarket.com, clob.polymarket.com and api.binance.com. No API keys.
 ---
 
 # Polymarket wallet X-ray
@@ -64,7 +65,12 @@ Official Polymarket PnL <x> · volume <y> · <trades> trades · reliability: <le
 |---|---|---|---|---|---|
 | return | … | … | … | … | … |
 | share of his money copied | … | … | … | … | … |
-<one-line conclusion>
+
+**Copy? <yes, up to N minutes late / no: <reason> / unclear: <reason>>**
+1. One minute late: <m1 return> – <negative: the copy already loses>
+2. How long its markets live: <minutes / hours / days, from the recipe's markets and entry window> – <minutes: speed wins and a copy arrives late; hours or days: a copy has time>
+3. Where the money comes from: reliability <level> – <if conversions, merges or rebates drive the profit: copying the trades will not repeat it>
+4. Sample: <positions> positions – <under ~30: it could be luck>
 
 ### What the trades cannot show
 <1–3 lines>
@@ -81,6 +87,7 @@ Why these rules matter:
 - **Say which period you describe.** The recipe covers the whole export; when it says "Last 30 days it trades something else:", the wallet has switched markets – lead with what it trades now.
 - **Maker vs taker by trades and by money can disagree** (many small fills from his resting orders, most money taken from the book). Report both, as the recipe does; it changes how copyable he is.
 - **Bot vs human is a heuristic** (≥4 of 8 signals = bot, 2–3 = unclear). Name the signals that fired instead of asserting intent.
+- **The copy verdict** answers "can I copy it?" in one line, then the four checks show why. "no" when the copy is already negative one minute late (or right after him); "yes, up to N minutes late" for the longest delay that is still positive with at least half of his money copied; "unclear" when the sample is under ~30 positions or reliability is "unreliable" – say which. Each check states its number, never a guess.
 - **This is analysis of public data, not investment advice.** Do not tell the user to deposit, bet or copy; describe what the numbers show.
 
 ## 4. Copy it on paper (only when the user asks)
@@ -109,4 +116,4 @@ It writes `WALLET_SUMMARY.md` in the data folder: one table with type, reliabili
 
 - **Missing Python packages** – the script prints the `pip install -r requirements.txt` command; ask the user before installing.
 - **"could not find a wallet"** – the name search found no exact profile; ask for the 0x address or the profile link.
-- **pmx not found** – the script looks in `$PMX_HOME`, then the plugin or repo this skill lives in; tell the user to install the plugin, clone github.com/Archive228/polymarket-xray, or set `PMX_HOME`.
+- **pmx not found** – the script looks in `$PMX_HOME`, then the plugin or repo this skill lives in, then the folder `scripts/setup.sh` installs to. When only this skill folder was copied (a skill installer, Grok Bot, Cursor, Codex), run `bash <this skill's directory>/scripts/setup.sh`: it clones github.com/Archive228/polymarket-xray into `/workspace/polymarket-xray` (or `~/.polymarket-xray/src`) and installs the Python packages. Ask the user first if you cannot install on your own.

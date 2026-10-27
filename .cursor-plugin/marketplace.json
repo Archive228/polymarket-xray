@@ -1,0 +1,11 @@
+{
+  "name": "polymarket-xray",
+  "owner": { "name": "Archive228" },
+  "plugins": [
+    {
+      "name": "polymarket-xray",
+      "source": "./",
+      "description": "Reverse-engineer any Polymarket wallet and check whether it can be copied"
+    }
+  ]
+}

@@ -27,6 +27,17 @@ python3 -m pmx all <0x address | profile link | profile name>
 
 Wallets with hundreds of thousands of trades: add `--days 30` to analyse the recent period only.
 
+**In any other AI agent**
+
+Any agent that can run Python and reach the internet can use it. Agents that read `AGENTS.md` (Codex, Cursor and others) pick up the instructions from the repo; for the rest, paste this:
+
+```
+Clone https://github.com/Archive228/polymarket-xray, install requirements.txt and follow its AGENTS.md.
+Then x-ray the Polymarket wallet <wallet>: is it a bot, what does it do, can I copy it?
+```
+
+If an installer copied only the skill folder, run `skills/xray/scripts/setup.sh` once: it clones the repo into `/workspace/polymarket-xray` (or `~/.polymarket-xray/src`) and installs the packages.
+
 ## What you get
 
 For each wallet, in `<data folder>/wallets/<address>/` – `~/.polymarket-xray` for the plugin, `data/` in a clone, or wherever `PMX_DATA` points:
