@@ -17,7 +17,25 @@ def main() -> None:
         sp = sub.add_parser(name, help=h)
         sp.add_argument("target")
         sp.add_argument("--days", type=int, default=None, help="export only the last N days (for huge wallets)")
+    from .scout import CATEGORIES, PERIODS
+    sp = sub.add_parser("top", help="copy verdicts for the top of a Polymarket leaderboard")
+    sp.add_argument("--category", type=str.upper, default="OVERALL", choices=CATEGORIES)
+    sp.add_argument("--period", type=str.upper, default="WEEK", choices=PERIODS)
+    sp.add_argument("--n", type=int, default=10, help="how many wallets from the top")
+    sp.add_argument("--days", type=int, default=None, help="export only the last N days of each wallet")
+    sp = sub.add_parser("watch", help="re-check wallets and say what changed since the last check")
+    sp.add_argument("targets", nargs="+")
+    sp.add_argument("--days", type=int, default=None, help="export only the last N days of each wallet")
     a = p.parse_args()
+    if a.cmd == "top":
+        from .scout import top
+        out = top(a.category, a.period, a.n, a.days)
+        print(f"\n{out.read_text()}\n\nsaved: {out}")
+        return
+    if a.cmd == "watch":
+        from .scout import watch
+        print("\n" + "\n".join(watch(a.targets, a.days)))
+        return
     if a.cmd in ("export", "all"):
         d = export(a.target, days=a.days)
     if a.cmd in ("analyze", "all"):

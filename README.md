@@ -27,6 +27,17 @@ python3 -m pmx all <0x address | profile link | profile name>
 
 Wallets with hundreds of thousands of trades: add `--days 30` to analyse the recent period only.
 
+Many wallets at once, each with a copy verdict (yes, up to N minutes late / no / unclear):
+
+```bash
+python3 -m pmx top --category POLITICS --period WEEK --n 10   # who in this week's politics top 10 can still be copied
+python3 -m pmx watch <wallet> [<wallet> …]                    # what changed since the last check
+```
+
+**As a Grok Bot bot**
+
+Paste the block from [`grok-bot/BOT.md`](grok-bot/BOT.md) into Grok Bot. It creates *Polymarket Scout*: send it a wallet and it answers "copy? yes / no / unclear" with the four checks; every morning it scouts the top 10 of a leaderboard category and sends only the wallets a copy can still profit from; every evening it re-checks your watchlist and messages you when something changes.
+
 **In any other AI agent**
 
 Any agent that can run Python and reach the internet can use it. Agents that read `AGENTS.md` (Codex, Cursor and others) pick up the instructions from the repo; for the rest, paste this:

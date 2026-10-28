@@ -15,6 +15,15 @@ A wallet with up to ~10,000 trades takes under a minute; millions of trades take
 
 Results go to `data/wallets/<address>/` (or `$PMX_DATA/wallets/<address>/`).
 
+Two commands run that breakdown on many wallets and give each a copy verdict:
+
+```bash
+python3 -m pmx top --category POLITICS --period WEEK --n 10   # the top of a leaderboard → TOP_<category>_<period>_<date>.md
+python3 -m pmx watch <wallet> [<wallet> …]                    # what changed since each wallet's previous check
+```
+
+Each takes a few minutes per wallet. On an agent with a schedule, run `top` every morning and `watch` every evening, and tell the user only the "yes" wallets and the changes. `grok-bot/BOT.md` is a ready bot for Grok Bot that does exactly that.
+
 ## Read, in this order
 
 1. `analysis.json` → `reliability.level` and `reliability.reasons`: how much of the rest you may state as fact.

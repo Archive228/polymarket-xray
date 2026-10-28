@@ -1,6 +1,6 @@
 ---
 name: xray
-description: Reverse-engineer any Polymarket wallet with the local pmx tool – download every trade, tell whether it is a bot and which strategy it runs (step-by-step recipe with evidence), where the money really comes from, and whether copying it still pays after a 1–60 minute delay; optionally copy it on a paper account against live order books. Use this whenever the user gives a Polymarket wallet address, a profile link (polymarket.com/@name or /profile/0x…) or a trader name and asks what it does, how it makes money, whether it is a bot, whether to copy-trade it, "analyze this wallet", "what is his strategy", "can he be copied", or wants several Polymarket traders compared – even if pmx is not mentioned.
+description: Reverse-engineer any Polymarket wallet with the local pmx tool – download every trade, tell whether it is a bot and which strategy it runs (step-by-step recipe with evidence), where the money really comes from, and whether copying it still pays after a 1–60 minute delay; optionally copy it on a paper account against live order books. Use this whenever the user gives a Polymarket wallet address, a profile link (polymarket.com/@name or /profile/0x…) or a trader name and asks what it does, how it makes money, whether it is a bot, whether to copy-trade it, "analyze this wallet", "what is his strategy", "can he be copied", or wants several Polymarket traders compared, or asks which top traders on a Polymarket leaderboard can be copied, or wants wallets watched for changes – even if pmx is not mentioned.
 compatibility: Needs python3, git and outbound HTTPS to github.com, data-api.polymarket.com, gamma-api.polymarket.com, clob.polymarket.com and api.binance.com. No API keys.
 ---
 
@@ -111,6 +111,28 @@ bash <this skill's directory>/scripts/summary.sh
 ```
 
 It writes `WALLET_SUMMARY.md` in the data folder: one table with type, reliability and copyability for every analysed wallet, plus short recipes.
+
+## 6. Scout a leaderboard
+
+When the user asks who on Polymarket can be copied, which top traders are worth following, or to scout a category:
+
+```bash
+bash <this skill's directory>/scripts/top.sh --category POLITICS --period WEEK --n 10
+```
+
+Categories: OVERALL, POLITICS, SPORTS, CRYPTO, CULTURE, MENTIONS, WEATHER, ECONOMICS, TECH, FINANCE, ESPORTS. Periods: DAY, WEEK, MONTH, ALL. It runs the whole breakdown on each wallet (a few minutes each; huge wallets get their last 30 days), so run it in the background. It prints and saves `TOP_<category>_<period>_<date>.md`: one row per wallet with its copy verdict, and a short recipe for every "yes". Lead your answer with the "yes" wallets and how many minutes late a copy still pays; if there are none, say so.
+
+## 7. Watch wallets
+
+When the user wants to follow wallets over time:
+
+```bash
+bash <this skill's directory>/scripts/watch.sh <wallet> [<wallet> …]
+```
+
+It re-runs the breakdown and compares each verdict with the wallet's previous check (`verdicts.jsonl` in its folder): the verdict, the one-minute-late return turning negative, the main market, a 5-point move in its own return. Tell the user only what changed; "no change" is a one-line answer. On an agent with a schedule (Grok Bot routines, cron), run it daily.
+
+The verdict in sections 6 and 7 uses the same rule as "Copy?" in section 3, computed by `pmx/scout.py`.
 
 ## Troubleshooting
 
