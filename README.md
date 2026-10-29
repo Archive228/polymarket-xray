@@ -27,7 +27,7 @@ python3 -m pmx all <0x address | profile link | profile name>
 
 Wallets with hundreds of thousands of trades: add `--days 30` to analyse the recent period only.
 
-Many wallets at once, each with a copy verdict (yes, up to N minutes late / no / unclear):
+Many wallets at once, each with a copy verdict (yes, up to N minutes late / no / unclear) and a Copy Score from 0 to 100:
 
 ```bash
 python3 -m pmx top --category POLITICS --period WEEK --n 10   # who in this week's politics top 10 can still be copied

@@ -40,25 +40,26 @@ def _throttle(host: str) -> None:
         time.sleep(wait)
 
 
-def get(url: str, params=None, tries: int = 6):
-    """GET with retries: 429/5xx – wait (Retry-After if present), network errors – retry after a pause."""
+def get(url: str, params=None, tries: int = 9):
+    """GET with retries: 429/5xx and network errors – wait (Retry-After if present) with a doubling pause, up to a minute,
+    so a rate limit hit while scouting many wallets at once waits it out instead of failing the wallet."""
     host = urllib.parse.urlparse(url).netloc
+    status = None
     for a in range(tries):
         _throttle(host)
+        pause = min(60.0, 1.5 * 2 ** a)
         try:
             r = _session.get(url, params=params, timeout=45)
         except requests.RequestException:
-            time.sleep(1.5 * (a + 1))
+            time.sleep(pause)
             continue
-        if r.status_code == 200:
+        status = r.status_code
+        if status == 200:
             return r.json()
-        if r.status_code in (429, 500, 502, 503, 504):
-            time.sleep(float(r.headers.get("Retry-After") or 1.5 * (a + 1)))
-            continue
-        if r.status_code in (400, 404):
+        if status in (400, 404):
             return None
-        time.sleep(1.5 * (a + 1))
-    raise RuntimeError(f"request failed: {url} {params}")
+        time.sleep(float(r.headers.get("Retry-After") or pause))
+    raise RuntimeError(f"request failed ({status}): {url} {params}")
 
 
 def cached(name: str, fn):

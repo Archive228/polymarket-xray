@@ -22,6 +22,8 @@ PERIODS = ("DAY", "WEEK", "MONTH", "ALL")
 DELAYS = (("m60", 60), ("m15", 15), ("m5", 5), ("m1", 1))     # longest first: the verdict names the longest delay that still pays
 MIN_POSITIONS = 30
 THIN = .02                                                   # a "yes" under +2% a minute late says the edge is thin
+FULL_SCORE = .25                                             # a copy a minute late at +25% or more gets the full Copy Score
+TRUST = {"reliable": 1, "approximate": .8, "unreliable": .4}
 BIG = 300_000                                                # above this many trades only the last 30 days are exported, as in xray.sh
 
 
@@ -59,12 +61,27 @@ def _pct(x) -> str:
     return "–" if x is None else f"{x * 100:+.1f}%".replace("-", "−")
 
 
+def _score(x) -> str:
+    return "–" if x is None else f"{x}/100"
+
+
 def _span(sec) -> str:
     if sec is None:
         return "–"
     if sec < 3600:
         return f"{sec / 60:.0f} min"
     return f"{sec / 3600:.0f} h" if sec < 2 * 86400 else f"{sec / 86400:.0f} days"
+
+
+def copy_score(v: str, m1, delays_ok: int, positions: int, level: str) -> int | None:
+    """Copy Score, 0–100: the four checks in one number. How much a copy one minute late still makes (+25% or more is full
+    marks), how many of the delays (1, 5, 15, 60 min) still pay, and how far to trust it (sample size, data check).
+    0 for a "no"; none when nothing has resolved yet."""
+    if positions == 0:
+        return None
+    if v == "no" or not m1 or m1 <= 0:
+        return 0
+    return round(100 * min(1, m1 / FULL_SCORE) * (.4 + .6 * delays_ok / len(DELAYS)) * min(1, positions / MIN_POSITIONS) * TRUST[level])
 
 
 def verdict(d: Path) -> dict:
@@ -97,6 +114,7 @@ def verdict(d: Path) -> dict:
             why += f", but thin: {_pct(m1)} a minute late"
     st = a["bot"].get("style") or {}
     return {"verdict": v, "line": f"{v}, {why}" if v == "yes" else f"{v}: {why}",
+            "score": copy_score(v, m1, sum((roi(m) or 0) > 0 and share(m) >= .5 for m, _ in DELAYS), positions, rel["level"]),
             "name": a["passport"].get("name") or a["passport"]["wallet"][:10], "wallet": a["passport"]["wallet"],
             "who": f"{a['bot']['verdict']}, {st.get('label', '–')}", "category": a["categories"][0]["category"] if a["categories"] else "–",
             "his": roi("his"), "m1": m1, "entry_before_end": _span(to_end), "reliability": rel["level"], "positions": positions,
@@ -108,7 +126,7 @@ def record(d: Path, v: dict) -> dict | None:
     p = d / "verdicts.jsonl"
     lines = p.read_text().splitlines() if p.exists() else []
     prev = json.loads(lines[-1]) if lines else None
-    keep = {k: v[k] for k in ("verdict", "line", "his", "m1", "category", "who")}
+    keep = {k: v[k] for k in ("verdict", "line", "score", "his", "m1", "category", "who")}
     with p.open("a") as f:
         f.write(json.dumps({"checked": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"), **keep}) + "\n")
     return prev
@@ -123,6 +141,8 @@ def changes(prev: dict | None, v: dict) -> list[str]:
         out.append(f"verdict: {prev['line']} → {v['line']}")
     if prev.get("m1") is not None and v["m1"] is not None and (prev["m1"] < 0) != (v["m1"] < 0):
         out.append(f"one minute late: {_pct(prev['m1'])} → {_pct(v['m1'])}")
+    if prev.get("score") is not None and v["score"] is not None and abs(v["score"] - prev["score"]) >= 15:
+        out.append(f"Copy Score: {prev['score']} → {v['score']}")
     if prev.get("category") != v["category"]:
         out.append(f"main market: {prev.get('category')} → {v['category']}")
     if prev.get("his") is not None and v["his"] is not None and abs(v["his"] - prev["his"]) >= .05:
@@ -131,10 +151,15 @@ def changes(prev: dict | None, v: dict) -> list[str]:
 
 
 def _check(target: str, days, log) -> tuple[dict | None, str | None]:
+    from .analyze import NoTrades
     try:
-        w, _ = api.resolve_wallet(target)
+        w, name = api.resolve_wallet(target)
         d = xray(w, days, log)
         return verdict(d), None
+    except NoTrades:                            # profit from rewards or redemptions only: a verdict, not a failure
+        return {"verdict": "unclear", "line": "unclear: it has no trades, its profit does not come from trading", "score": None,
+                "name": name, "wallet": w, "who": "–", "category": "–", "his": None, "m1": None, "entry_before_end": "–",
+                "reliability": "unreliable", "positions": 0, "steps": [], "report": str(ROOT / w / "report.html")}, None
     except (Exception, SystemExit) as e:        # one broken wallet must not stop the rest of the list
         return None, str(e)
 
@@ -152,21 +177,22 @@ def top(category: str = "OVERALL", period: str = "WEEK", n: int = 10, days: int 
         rows.append((b, v, err))
     day = dt.datetime.utcnow().strftime("%Y-%m-%d")
     L = [f"# Polymarket top {len(board)} – {category.lower()}, {period.lower()}, {day}", "",
-         "Copy verdict for each wallet: yes (up to how many minutes late a copy still makes money), no, or unclear. "
-         "Return = the wallet's own recent resolved positions; 1 min late = a copy one minute behind it, paying the taker fee.", "",
-         f"| # | wallet | profit, {period.lower()} | who | copy? | own return | 1 min late | enters before the end | positions |",
-         "|---|---|---|---|---|---|---|---|---|"]
+         "Copy verdict for each wallet: yes (up to how many minutes late a copy still makes money), no, or unclear, and its "
+         "Copy Score from 0 to 100. Return = the wallet's own recent resolved positions; 1 min late = a copy one minute behind it, "
+         "paying the taker fee.", "",
+         f"| # | wallet | profit, {period.lower()} | who | copy? | score | own return | 1 min late | enters before the end | positions |",
+         "|---|---|---|---|---|---|---|---|---|---|"]
     for i, (b, v, err) in enumerate(rows, 1):
         pnl = f"${b['pnl']:,.0f}" if b["pnl"] is not None else "–"
         if v:
-            L.append(f"| {i} | {b['name']} | {pnl} | {v['who']} | **{v['line']}** | {_pct(v['his'])} | {_pct(v['m1'])} | "
+            L.append(f"| {i} | {b['name']} | {pnl} | {v['who']} | **{v['line']}** | {_score(v['score'])} | {_pct(v['his'])} | {_pct(v['m1'])} | "
                      f"{v['entry_before_end']} | {v['positions']} |")
         else:
-            L.append(f"| {i} | {b['name']} | {pnl} | – | not checked: {err} | | | | |")
-    yes = [v for _, v, _ in rows if v and v["verdict"] == "yes"]
+            L.append(f"| {i} | {b['name']} | {pnl} | – | not checked: {err} | | | | | |")
+    yes = sorted((v for _, v, _ in rows if v and v["verdict"] == "yes"), key=lambda v: -(v["score"] or 0))
     L += ["", f"## Worth a closer look: {len(yes)}", ""]
     for v in yes:
-        L += [f"### {v['name']} – {v['line']}", f"`{v['wallet']}` · {v['category']} · reliability: {v['reliability']}", ""]
+        L += [f"### {v['name']} – Copy Score {_score(v['score'])}, {v['line']}", f"`{v['wallet']}` · {v['category']} · reliability: {v['reliability']}", ""]
         L += [f"{j}. {s}" for j, s in enumerate(v["steps"], 1)] + ["", f"Report: {v['report']}", ""]
     if not yes:
         L.append("None of them can be copied at a profit right now.")
@@ -185,5 +211,5 @@ def watch(targets: list[str], days: int | None = None, log=print) -> list[str]:
             out.append(f"{t}: not checked: {err}")
             continue
         prev = record(Path(v["report"]).parent, v)
-        out.append(f"{v['name']}: {v['line']}\n" + "".join(f"   – {c}\n" for c in changes(prev, v)).rstrip())
+        out.append(f"{v['name']}: {v['line']} · Copy Score {_score(v['score'])}\n" + "".join(f"   – {c}\n" for c in changes(prev, v)).rstrip())
     return out

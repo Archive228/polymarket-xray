@@ -66,9 +66,15 @@ def load(d: Path) -> dict:
             "meta": json.loads((d / "meta.json").read_text()) if (d / "meta.json").exists() else {}}
 
 
+class NoTrades(SystemExit):
+    """A wallet whose export has no trades at all (profit from rewards or redemptions only)."""
+
+
 def analyze(d: Path) -> dict:
     D = load(d)
     t, pos, mk, pnl, st = D["trades"], D["positions"], D["markets"], D["pnl"], D["stats"]
+    if not len(t) or "size" not in t.columns:
+        raise NoTrades("the wallet has no trades in the export: its profit does not come from trading, so there is nothing to read or copy")
     t = t.copy()
     t["usd"] = t["size"] * t["price"]
     t["dt"] = pd.to_datetime(t["timestamp"], unit="s", utc=True)

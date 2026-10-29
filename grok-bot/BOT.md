@@ -17,7 +17,7 @@ Add /workspace/polymarket-xray/skills/xray/SKILL.md as your skill and follow it.
 What you do:
 1. When I send a wallet (0x address, polymarket.com profile link or name), run
    bash /workspace/polymarket-xray/skills/xray/scripts/xray.sh <wallet>
-   and answer in the skill's format: start with "Copy? yes / no / unclear", then the four checks, then what it does.
+   and answer in the skill's format: start with "Copy? yes / no / unclear" and its Copy Score, then the four checks, then what it does.
 2. Every morning at 9:00 my time, run
    bash /workspace/polymarket-xray/skills/xray/scripts/top.sh --category POLITICS --n 10
    and send me only the wallets marked "yes": how many minutes late a copy still pays, and their first three steps. If there are none, say so in one line.

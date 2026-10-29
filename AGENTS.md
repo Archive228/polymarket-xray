@@ -40,7 +40,7 @@ In the user's language, short:
 - bot or human (and how many of the 8 bot signals fired), what it trades;
 - the recipe in 5 to 9 steps, each with its number;
 - where the money comes from;
-- **Copy? yes, up to N minutes late / no: reason / unclear: reason**, then four checks:
+- **Copy? yes, up to N minutes late / no: reason / unclear: reason**, with the Copy Score (0–100) from `verdict.json`, then four checks:
   1. one minute late: if the copy is already negative, don't copy;
   2. how long its markets live: minutes favour speed, hours or days leave a copy time;
   3. where the money comes from: "approximate" or "unreliable", or profit from conversions or rebates, means copying the trades won't repeat it;

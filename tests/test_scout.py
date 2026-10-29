@@ -65,3 +65,14 @@ def test_watch_reports_what_changed(tmp_path):
     assert any(x.startswith("verdict: yes") for x in c) and any("one minute late" in x for x in c)
     assert len((d / "verdicts.jsonl").read_text().splitlines()) == 2
     assert changes(json.loads((d / "verdicts.jsonl").read_text().splitlines()[-1]), second)[0].startswith("no change since")
+
+
+def test_copy_score(tmp_path):
+    full = {"his": .43, "m0": .40, "m1": .344, "m5": .3, "m15": .3, "m60": .25}
+    assert verdict(wallet(tmp_path, full))["score"] == 100
+    v = verdict(wallet(tmp_path, {"his": .108, "m0": .104, "m1": .102, "m5": .098, "m15": .085, "m60": .012}))
+    assert v["score"] == round(100 * .102 / .25)                       # all four delays pay: the edge decides
+    assert verdict(wallet(tmp_path, full, level="approximate"))["score"] == 80
+    assert verdict(wallet(tmp_path, {"his": .074, "m0": .01, "m1": -.121}))["score"] == 0
+    assert verdict(wallet(tmp_path, {}, positions=0))["score"] is None
+    assert verdict(wallet(tmp_path, full, positions=15))["score"] == 50   # half the sample it needs

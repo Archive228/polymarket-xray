@@ -269,7 +269,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px
 <table><tr><th>price move since the window start</th><th>share of his money</th><th>on the leading side</th><th>the leader ended up winning</th></tr>
 {% for x in sig.by_move %}<tr><td>{{ x.move }}</td><td>{{ share(x.share_usd) }}</td><td>{{ share(x.on_lead_usd) }}</td><td>{{ share(x.lead_wins) }}</td></tr>{% endfor %}</table>
 {% if sig.buy_leader %}<div class="sub">leader buys: win {{ share(sig.buy_leader.win_rate) }} at an average price of {{ '%.2f'|format(sig.buy_leader.avg_price) }} ({{ pct(sig.buy_leader.roi_before_fees) }} before fees) ·
-against the leader: {{ share(sig.buy_against.win_rate) }} at {{ '%.2f'|format(sig.buy_against.avg_price) }} ({{ pct(sig.buy_against.roi_before_fees) }})</div>{% endif %}{% endif %}
+{% if sig.buy_against %}against the leader: {{ share(sig.buy_against.win_rate) }} at {{ '%.2f'|format(sig.buy_against.avg_price) }} ({{ pct(sig.buy_against.roi_before_fees) }}){% else %}never against the leader{% endif %}</div>{% endif %}{% endif %}
 {% if tt.buckets %}<h2>When he buys relative to the market end</h2><table><tr><th>until trading ends</th><th>share of trades</th><th>share of money</th><th>median shares</th><th>average price</th></tr>
 {% for x in tt.buckets %}<tr><td>{{ x.bucket }}</td><td>{{ share(x.share_trades) }}</td><td>{{ share(x.share_usd) }}</td><td>{{ x.median_shares }}</td><td>{{ x.avg_price }}</td></tr>{% endfor %}</table>{% endif %}
 {% if outcomes %}<h2>Profit by outcome</h2>{% if dwarn %}<div class="rel warn"><b>Caution</b><div class="sub">{{ dwarn }}</div></div>{% endif %}

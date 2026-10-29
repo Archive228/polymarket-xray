@@ -90,7 +90,7 @@ def copysim(d: Path, sample: int = 300, log=print) -> dict:
         times, prices = [h["t"] for h in hist], [float(h["p"]) for h in hist]
         stop = times[-1] + 120
         closed = pd.to_datetime(row.closed, utc=True, errors="coerce")
-        if closed is not pd.NaT and closed == closed:
+        if closed is not None and not pd.isna(closed):
             stop = min(stop, closed.timestamp())
         for mode in MODES:
             dly = None if mode == "his" else int(mode[1:]) * 60

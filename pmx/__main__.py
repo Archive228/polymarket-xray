@@ -84,6 +84,11 @@ def main() -> None:
         d = ROOT / api.resolve_wallet(a.target)[0]
         print(f"report: {report(d)}")
         print((d / "summary.md").read_text())
+        if (d / "copysim.json").exists():
+            from .scout import verdict
+            v = verdict(d)
+            (d / "verdict.json").write_text(json.dumps(v, ensure_ascii=False, indent=1))
+            print(f"Copy? {v['line']} · Copy Score {'–' if v['score'] is None else v['score']}/100")
 
 
 if __name__ == "__main__":

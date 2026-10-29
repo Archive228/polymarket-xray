@@ -119,8 +119,8 @@ def build(a: dict, t: pd.DataFrame, mk: pd.DataFrame) -> dict:
     steps, spec, econ = [], [], []
     rl = a["reliability"]
     buys = t[t["side"] == "BUY"].copy()
-    if not len(buys):
-        return {"steps": [], "spec": [], "economics": [], "unseen": []}
+    if not len(buys):                       # only sells, merges or conversions: nothing to read a recipe from
+        return {"reliability": rl["level"], "steps": [], "spec": [], "economics": [], "unseen": []}
     buys["usd"] = buys["size"] * buys["price"]
     tot = buys["usd"].sum()
 

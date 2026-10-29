@@ -38,8 +38,9 @@ All files are in the wallet folder the script prints (`<data folder>/wallets/<ad
 1. `analysis.json` → `reliability`: `level` ("reliable" / "approximate" / "unreliable") and `reasons`. Read this first, because it decides how much of the rest you can state as fact.
 2. `recipe.md` – the main result: steps, technical spec, where the money comes from, what the trades cannot show.
 3. `summary.md` – the same in plain sentences, including the copyability line.
-4. `copysim.json` → `overall`: `roi` and `copied_share` for `his`, `m0` (right after him), `m1`, `m5`, `m15`, `m60`; `population_positions` and `sample`.
-5. `signal.json` – only for crypto Up/Down wallets.
+4. `verdict.json` → `line` and `score`: the copy verdict and the Copy Score (0–100), computed by the rule below. Use them as they are.
+5. `copysim.json` → `overall`: `roi` and `copied_share` for `his`, `m0` (right after him), `m1`, `m5`, `m15`, `m60`; `population_positions` and `sample`.
+6. `signal.json` – only for crypto Up/Down wallets.
 
 For a question the files above do not answer directly, `references/fields.md` explains every field.
 
@@ -66,7 +67,7 @@ Official Polymarket PnL <x> · volume <y> · <trades> trades · reliability: <le
 | return | … | … | … | … | … |
 | share of his money copied | … | … | … | … | … |
 
-**Copy? <yes, up to N minutes late / no: <reason> / unclear: <reason>>**
+**Copy? <yes, up to N minutes late / no: <reason> / unclear: <reason>> · Copy Score <score>/100**
 1. One minute late: <m1 return> – <negative: the copy already loses>
 2. How long its markets live: <minutes / hours / days, from the recipe's markets and entry window> – <minutes: speed wins and a copy arrives late; hours or days: a copy has time>
 3. Where the money comes from: reliability <level> – <if conversions, merges or rebates drive the profit: copying the trades will not repeat it>
@@ -87,6 +88,7 @@ Why these rules matter:
 - **Say which period you describe.** The recipe covers the whole export; when it says "Last 30 days it trades something else:", the wallet has switched markets – lead with what it trades now.
 - **Maker vs taker by trades and by money can disagree** (many small fills from his resting orders, most money taken from the book). Report both, as the recipe does; it changes how copyable he is.
 - **Bot vs human is a heuristic** (≥4 of 8 signals = bot, 2–3 = unclear). Name the signals that fired instead of asserting intent.
+- **The Copy Score** (0–100) puts the four checks in one number: how much a copy one minute late still makes (+25% or more is full marks), how many of the delays still pay, and how far to trust it (sample size, reliability). 0 means "no". Quote it from `verdict.json`; never compute your own.
 - **The copy verdict** answers "can I copy it?" in one line, then the four checks show why. "no" when the copy is already negative one minute late (or right after him); "yes, up to N minutes late" for the longest delay that is still positive with at least half of his money copied; "unclear" when the sample is under ~30 positions or reliability is "unreliable" – say which. Each check states its number, never a guess.
 - **This is analysis of public data, not investment advice.** Do not tell the user to deposit, bet or copy; describe what the numbers show.
 
